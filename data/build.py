@@ -16,14 +16,24 @@ def make_data_loader(cfg):
     train_transforms = build_transforms(cfg, is_train=True)
     val_transforms = build_transforms(cfg, is_train=False)
     num_workers = cfg.DATALOADER.NUM_WORKERS
-    if len(cfg.DATASETS.NAMES) == 1:
-        dataset = init_dataset(cfg.DATASETS.NAMES, root=cfg.DATASETS.ROOT_DIR)
+
+    # Check if DATASETS.NAMES is a tuple or list and is not empty
+    if isinstance(cfg.DATASETS.NAMES, (tuple, list)) and len(cfg.DATASETS.NAMES) >= 1:
+        # --- MODIFIED LINE ---
+        # Pass the first dataset name string (e.g., 'market1501') from the tuple/list
+        dataset = init_dataset(cfg.DATASETS.NAMES[0], root=cfg.DATASETS.ROOT_DIR)
+        # ---------------------
     else:
-        # TODO: add multi dataset to train
-        dataset = init_dataset(cfg.DATASETS.NAMES, root=cfg.DATASETS.ROOT_DIR)
+        # Handle cases where NAMES might be unexpectedly empty or not a sequence
+        # Or potentially handle multi-dataset logic if cfg.DATASETS.NAMES has multiple elements
+        # For now, we'll raise an error or default if appropriate
+        raise ValueError("cfg.DATASETS.NAMES is not a valid sequence or is empty.")
+        # If supporting multi-dataset:
+        # dataset = init_dataset(cfg.DATASETS.NAMES, root=cfg.DATASETS.ROOT_DIR) # Keep original multi-dataset logic if needed
 
     num_classes = dataset.num_train_pids
     train_set = ImageDataset(dataset.train, train_transforms)
+
     if cfg.DATALOADER.SAMPLER == 'softmax':
         train_loader = DataLoader(
             train_set, batch_size=cfg.SOLVER.IMS_PER_BATCH, shuffle=True, num_workers=num_workers,
