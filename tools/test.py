@@ -39,7 +39,7 @@ def main():
 
     output_dir = cfg.OUTPUT_DIR
     if output_dir and not os.path.exists(output_dir):
-        mkdir(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
 
     logger = setup_logger("reid_baseline", output_dir, 0)
     logger.info("Using {} GPUS".format(num_gpus))
