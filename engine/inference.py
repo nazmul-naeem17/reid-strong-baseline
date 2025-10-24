@@ -18,8 +18,8 @@ def create_supervised_evaluator(model, metrics,
     Factory function for creating an evaluator for supervised models
 
     Args:
-        model (`torch.nn.Module`): the model to train
-        metrics (dict of str - :class:`ignite.metrics.Metric`): a map of metric names to Metrics
+        model (torch.nn.Module): the model to train
+        metrics (dict of str - :class:ignite.metrics.Metric): a map of metric names to Metrics
         device (str, optional): device type specification (default: None).
             Applies to both model and batches.
     Returns:
@@ -58,12 +58,14 @@ def inference(
     logger.info("Enter inferencing")
     if cfg.TEST.RE_RANKING == 'no':
         print("Create evaluator")
-        evaluator = create_supervised_evaluator(model, metrics={'r1_mAP': R1_mAP(num_query, max_rank=50, feat_norm=cfg.TEST.FEAT_NORM)},
-                                                device=device)
+        # --- MODIFIED LINE: Pass cfg ---
+        evaluator = create_supervised_evaluator(model, metrics={'r1_mAP': R1_mAP(num_query, max_rank=50, feat_norm=cfg.TEST.FEAT_NORM, cfg=cfg)},
+                                              device=device)
     elif cfg.TEST.RE_RANKING == 'yes':
         print("Create evaluator for reranking")
-        evaluator = create_supervised_evaluator(model, metrics={'r1_mAP': R1_mAP_reranking(num_query, max_rank=50, feat_norm=cfg.TEST.FEAT_NORM)},
-                                                device=device)
+        # --- MODIFIED LINE: Pass cfg ---
+        evaluator = create_supervised_evaluator(model, metrics={'r1_mAP': R1_mAP_reranking(num_query, max_rank=50, feat_norm=cfg.TEST.FEAT_NORM, cfg=cfg)},
+                                              device=device)
     else:
         print("Unsupported re_ranking config. Only support for no or yes, but got {}.".format(cfg.TEST.RE_RANKING))
 
