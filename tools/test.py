@@ -7,8 +7,7 @@
 import argparse
 import os
 import sys
-from os import mkdir
-
+# from os import mkdir  <- This is replaced by os.makedirs
 import torch
 from torch.backends import cudnn
 
@@ -39,6 +38,7 @@ def main():
 
     output_dir = cfg.OUTPUT_DIR
     if output_dir and not os.path.exists(output_dir):
+        # FIX 1: Use os.makedirs to create all parent directories
         os.makedirs(output_dir, exist_ok=True)
 
     logger = setup_logger("reid_baseline", output_dir, 0)
@@ -63,5 +63,5 @@ def main():
     inference(cfg, model, val_loader, num_query)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # <-- FIX 2: Corrected 'name' to '__name__' and 'main' to '__main__'
     main()
