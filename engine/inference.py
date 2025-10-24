@@ -56,18 +56,22 @@ def inference(
 
     logger = logging.getLogger("reid_baseline.inference")
     logger.info("Enter inferencing")
-    if cfg.TEST.RE_RANKING == 'no':
+
+    # --- MODIFIED BLOCK ---
+    # Handle both string ('no'/'yes') and boolean (False/True) for RE_RANKING
+    if cfg.TEST.RE_RANKING == 'no' or cfg.TEST.RE_RANKING == False:
         print("Create evaluator")
-        # --- MODIFIED LINE: Pass cfg ---
         evaluator = create_supervised_evaluator(model, metrics={'r1_mAP': R1_mAP(num_query, max_rank=50, feat_norm=cfg.TEST.FEAT_NORM, cfg=cfg)},
                                               device=device)
-    elif cfg.TEST.RE_RANKING == 'yes':
+    elif cfg.TEST.RE_RANKING == 'yes' or cfg.TEST.RE_RANKING == True:
         print("Create evaluator for reranking")
-        # --- MODIFIED LINE: Pass cfg ---
         evaluator = create_supervised_evaluator(model, metrics={'r1_mAP': R1_mAP_reranking(num_query, max_rank=50, feat_norm=cfg.TEST.FEAT_NORM, cfg=cfg)},
                                               device=device)
+    # ----------------------
     else:
         print("Unsupported re_ranking config. Only support for no or yes, but got {}.".format(cfg.TEST.RE_RANKING))
+        # Add a raise here to prevent the UnboundLocalError
+        raise ValueError("Unsupported RE_RANKING value: {}".format(cfg.TEST.RE_RANKING))
 
     evaluator.run(val_loader)
     cmc, mAP = evaluator.state.metrics['r1_mAP']
